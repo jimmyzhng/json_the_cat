@@ -1,31 +1,25 @@
 const request = require('request');
-const catName = process.argv[2];
 
-request('https://api.thecat', (error, response, body) => {
+const fetchBreedDescription = (breedName, cb) => {
 
-  if (error) {
-    console.log(`Sorry, request failed! We encountered the following error: ${error}`);
+  request('https://api.thecatapi.com/v1/breeds/', (error, response, body) => {
 
-    if (response) {
-      console.log('statusCode:', response && response.statusCode);
+    if (error) {
+      return cb(error, null);
     }
 
-  }
-
-  if (!error) {
-
-    // We need to use deserialization (convert string to object)
     const data = JSON.parse(body);
-
-    // It is an array of objects, and each object has a key-value pair describing the name of the cat
-    // name : 'cat'
-
-    const foundCat = data.find(cat => cat.name === catName);
+    const foundCat = data.find(cat => cat.name === breedName);
 
     if (!foundCat) {
-      return console.log(`Sorry, cannot find cat!`);
+      return cb(`Sorry, cant find cat!`, null);
     }
 
-    console.log(foundCat.description);
-  }
-});
+    const catInfo = foundCat.description;
+
+    return cb(null, catInfo);
+
+  });
+};
+
+module.exports = { fetchBreedDescription };
